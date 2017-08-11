@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Ports;
@@ -6,6 +7,7 @@ using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
 
+[RequireComponent(typeof(AudioSource))]
 
 public class MainApplicationController : MonoBehaviour {
 
@@ -20,12 +22,14 @@ public class MainApplicationController : MonoBehaviour {
     public Text altitude_Txt;
     public Text distance_Txt;
     public Text photo_Y;
-    public Vector3 localPos;
 
     public GameObject rentgen_Ph;
 
     public float _NEW_MAX_HEIGHT_BY_USER;
-    int last;
+    //int last=255;
+
+    public  AudioSource _MovingScreen_AS;
+    public  AudioClip _movingScreen_AC;
 
     private static bool _killThread;
 
@@ -36,8 +40,19 @@ public class MainApplicationController : MonoBehaviour {
          arduinoThread = new Thread(ArduinoThreadMethod);
          arduinoThread.Name = "ArduinoThread";
          _sPorts = new List<string>(SerialPort.GetPortNames());
-         _RESET_SENSORS_VARIABLE();
+       // StartCoroutine(TestALT());
+        _RESET_SENSORS_VARIABLE();
     }
+
+  /*  IEnumerator TestALT()
+    {
+        float temp = _ALTITUDE - last;
+        _DELTA_ALT = new Vector3(0.0f, temp, 0.0f);
+        last = _ALTITUDE;
+
+        yield return new WaitForSeconds(0.1f);
+        StartCoroutine(TestALT());
+    }*/
 
     private void _RESET_SENSORS_VARIABLE()
     {
@@ -54,7 +69,6 @@ public class MainApplicationController : MonoBehaviour {
         ShouldStartNewThread();
         Start_Arduino_Thread();
         #endregion
-
 
         #region READING_AND_USING_SENSORS_VARIABLE
             DisplaySensorsValue();
@@ -100,14 +114,32 @@ public class MainApplicationController : MonoBehaviour {
 
     public void TransformRentgenPhoto()
     {
-       
-        if ((_DELTA_ALT != Vector3.zero) && IsSomebody_behind_Screen()) 
+
+        if ((_DELTA_ALT != Vector3.zero)) 
         {
-            float interval = MathematicAndfunctions.GetInterval(MathematicAndfunctions._GetNewMaximumPotentiometrValue(_NEW_MAX_HEIGHT_BY_USER));
-            Debug.LogWarning("DeltaA: " + _DELTA_ALT + " Interval: " + interval + " MaxPot:" + MathematicAndfunctions._GetNewMaximumPotentiometrValue(_NEW_MAX_HEIGHT_BY_USER));
-            rentgen_Ph.transform.position += new Vector3(0, ((_DELTA_ALT.y * -1) * interval), 0);
-            _DELTA_ALT = Vector3.zero;
+            if (!_MovingScreen_AS.isPlaying && _MovingScreen_AS != null)
+            {
+                _MovingScreen_AS.PlayOneShot(_movingScreen_AC, 0.5f);
+            }
+
+            if (IsSomebody_behind_Screen())
+             {
+                float interval = MathematicAndfunctions.GetInterval(MathematicAndfunctions._GetNewMaximumPotentiometrValue(_NEW_MAX_HEIGHT_BY_USER));
+                rentgen_Ph.transform.position += new Vector3(0, ((_DELTA_ALT.y * -1) * interval), 0);
+            }
         }
+        else
+        {
+            if(_MovingScreen_AS.isPlaying)
+            {
+                Invoke("StopPlay", 0.2f);
+            }
+        }
+    }
+
+    private void StopPlay()
+    {
+        _MovingScreen_AS.Stop();
     }
 
     public bool IsSomebody_behind_Screen()
@@ -134,10 +166,6 @@ public class MainApplicationController : MonoBehaviour {
         }
     }
 
-   public void SetUserHigh(float h)
-    {
-        _NEW_MAX_HEIGHT_BY_USER = h;
-    }
 
 #region ARDUINO_THREAD
     private void ArduinoThreadMethod()
