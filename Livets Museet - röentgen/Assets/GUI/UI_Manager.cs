@@ -69,7 +69,8 @@ public class UI_Manager : MonoBehaviour {
      IEnumerator Display_XRayPhoto_With_AudioEffect()
     {
        TakingPhoto_AS.PlayOneShot(_userHeightAccepted_AC, 0.7f);
-            yield return new WaitForSeconds(_userHeightAccepted_AC.length / 4);
+            yield return new WaitForSeconds(1);
+        TakingPhoto_AS.Stop();
         Display_SiteNr(6);
     }
 
