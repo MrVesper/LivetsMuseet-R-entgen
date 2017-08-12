@@ -44,7 +44,7 @@ public class MainApplicationController : MonoBehaviour {
         _RESET_SENSORS_VARIABLE();
     }
 
-  /*  IEnumerator TestALT()
+   /* IEnumerator TestALT()
     {
         float temp = _ALTITUDE - last;
         _DELTA_ALT = new Vector3(0.0f, temp, 0.0f);
@@ -117,24 +117,21 @@ public class MainApplicationController : MonoBehaviour {
 
         if ((_DELTA_ALT != Vector3.zero)) 
         {
-            if (!_MovingScreen_AS.isPlaying && _MovingScreen_AS != null)
-            {
-                _MovingScreen_AS.PlayOneShot(_movingScreen_AC, 0.5f);
-            }
 
             if (IsSomebody_behind_Screen())
              {
                 float interval = MathematicAndfunctions.GetInterval(MathematicAndfunctions._GetNewMaximumPotentiometrValue(_NEW_MAX_HEIGHT_BY_USER));
                 rentgen_Ph.transform.position += new Vector3(0, ((_DELTA_ALT.y * -1) * interval), 0);
+                _DELTA_ALT = Vector3.zero;//IMPORTANT: WE HAVE TO ZEROING D_ALT
             }
         }
-        else
+      /*  else
         {
             if(_MovingScreen_AS.isPlaying)
             {
                 Invoke("StopPlay", 0.2f);
             }
-        }
+        }*/
     }
 
     private void StopPlay()
@@ -186,8 +183,22 @@ public class MainApplicationController : MonoBehaviour {
 
                     _DELTA_ALT = new Vector3(0.0f,temp,0.0f);
 
+                    if (Convert.ToInt32(result[1]) != _ALTITUDE)
+                    {
+                        if (!_MovingScreen_AS.isPlaying && _MovingScreen_AS != null)
+                        {
+                            _MovingScreen_AS.PlayOneShot(_movingScreen_AC, 0.5f);
+                        }
+                    }
+                    else
+                    {
+                        _MovingScreen_AS.Stop();
+                    }
+
                     _DISTANCE = Convert.ToInt32(result[0]);
                     _ALTITUDE = Convert.ToInt32(result[1]);
+
+
 
                     Debug.LogWarning("_DELTA_ALT: "+ _DELTA_ALT);
                     stream.BaseStream.Flush();
