@@ -26,7 +26,7 @@ public class MainApplicationController : MonoBehaviour {
     public GameObject rentgen_Ph;
 
     public float _NEW_MAX_HEIGHT_BY_USER;
-    //int last=255;
+   // int last=255;
 
     public  AudioSource _MovingScreen_AS;
     public  AudioClip _movingScreen_AC;
@@ -40,19 +40,30 @@ public class MainApplicationController : MonoBehaviour {
          arduinoThread = new Thread(ArduinoThreadMethod);
          arduinoThread.Name = "ArduinoThread";
          _sPorts = new List<string>(SerialPort.GetPortNames());
-       // StartCoroutine(TestALT());
+        StartCoroutine(TestALT());
         _RESET_SENSORS_VARIABLE();
     }
 
-   /* IEnumerator TestALT()
+    IEnumerator TestALT()
     {
-        float temp = _ALTITUDE - last;
-        _DELTA_ALT = new Vector3(0.0f, temp, 0.0f);
-        last = _ALTITUDE;
 
-        yield return new WaitForSeconds(0.1f);
+       int delayedAlt = _ALTITUDE;
+
+        yield return new WaitForSeconds(0.15f);
+
+        if (delayedAlt != _ALTITUDE)
+        {
+            if (!_MovingScreen_AS.isPlaying && _MovingScreen_AS != null)
+            {
+                _MovingScreen_AS.PlayOneShot(_movingScreen_AC, 0.5f);
+            }
+        }
+        else
+        {
+            _MovingScreen_AS.Stop();
+        }
         StartCoroutine(TestALT());
-    }*/
+    }
 
     private void _RESET_SENSORS_VARIABLE()
     {
@@ -70,8 +81,12 @@ public class MainApplicationController : MonoBehaviour {
         Start_Arduino_Thread();
         #endregion
 
+        /*float temp = _ALTITUDE - last;
+        _DELTA_ALT = new Vector3(0.0f, temp, 0.0f);
+        last = _ALTITUDE;*/
+
         #region READING_AND_USING_SENSORS_VARIABLE
-            DisplaySensorsValue();
+        DisplaySensorsValue();
             TransformRentgenPhoto();
             photo_Y.text = "Photo Y: " + rentgen_Ph.transform.position.y.ToString();
         #endregion
@@ -115,23 +130,12 @@ public class MainApplicationController : MonoBehaviour {
     public void TransformRentgenPhoto()
     {
 
-        if ((_DELTA_ALT != Vector3.zero)) 
+        if (IsSomebody_behind_Screen() && _DELTA_ALT != Vector3.zero) 
         {
-
-            if (IsSomebody_behind_Screen())
-             {
                 float interval = MathematicAndfunctions.GetInterval(MathematicAndfunctions._GetNewMaximumPotentiometrValue(_NEW_MAX_HEIGHT_BY_USER));
                 rentgen_Ph.transform.position += new Vector3(0, ((_DELTA_ALT.y * -1) * interval), 0);
-                _DELTA_ALT = Vector3.zero;//IMPORTANT: WE HAVE TO ZEROING D_ALT
-            }
+                _DELTA_ALT = Vector3.zero;//IMPORTANT: WE HAVE TO ZEROING D_ALT AFTER IT WAS USED TO TRANSLATION
         }
-      /*  else
-        {
-            if(_MovingScreen_AS.isPlaying)
-            {
-                Invoke("StopPlay", 0.2f);
-            }
-        }*/
     }
 
     private void StopPlay()
@@ -182,18 +186,6 @@ public class MainApplicationController : MonoBehaviour {
                     float temp = Convert.ToInt32(result[1]) - _ALTITUDE;
 
                     _DELTA_ALT = new Vector3(0.0f,temp,0.0f);
-
-                    if (Convert.ToInt32(result[1]) != _ALTITUDE)
-                    {
-                        if (!_MovingScreen_AS.isPlaying && _MovingScreen_AS != null)
-                        {
-                            _MovingScreen_AS.PlayOneShot(_movingScreen_AC, 0.5f);
-                        }
-                    }
-                    else
-                    {
-                        _MovingScreen_AS.Stop();
-                    }
 
                     _DISTANCE = Convert.ToInt32(result[0]);
                     _ALTITUDE = Convert.ToInt32(result[1]);
