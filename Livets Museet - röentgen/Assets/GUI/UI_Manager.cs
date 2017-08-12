@@ -24,23 +24,34 @@ public class UI_Manager : MonoBehaviour {
        
 		if((currentDisplayedSiteNr >= 3 && currentDisplayedSiteNr <= 6) && !MainApplicationController.gameObject.GetComponent<MainApplicationController>().IsSomebody_behind_Screen())
         {
-                Invoke("Display_StartSite", 2);
+                Invoke("Display_IntroductionSite", 2);
         }
         else
         {
-            CancelInvoke("Display_StartSite");
+            CancelInvoke("Display_IntroductionSite");
         }
 
 		if(currentDisplayedSiteNr == 2 && !MainApplicationController.gameObject.GetComponent<MainApplicationController>().IsSomebody_behind_Screen())
 		{
-			Invoke("Display_ScreenSaver", 300);
+			Invoke("Display_StartSite", 300);
 
 		}
 		else
 		{
-			CancelInvoke("Display_ScreenSaver");
+			CancelInvoke("Display_StartSite");
 		}
-	}
+
+        if ((currentDisplayedSiteNr >= 1 && currentDisplayedSiteNr <= 6) &&
+            (!MainApplicationController.gameObject.GetComponent<MainApplicationController>().IsSomebody_behind_Screen() && !MainApplicationController.gameObject.GetComponent<MainApplicationController>().IsScreenMoving) )
+        {
+            Invoke("Display_ScreenSaver", 900);
+
+        }
+        else
+        {
+            CancelInvoke("Display_ScreenSaver");
+        }
+    }
 
 
     public void OnContinueClick()
@@ -62,30 +73,24 @@ public class UI_Manager : MonoBehaviour {
     }
 
     
-     /// <summary>
-     /// Playing Audio Height.mp3 and displaying X-Ray after couple sec.
-     /// </summary>
-     /// <returns></returns>
-     IEnumerator Display_XRayPhoto_With_AudioEffect()
-    {
-       TakingPhoto_AS.PlayOneShot(_userHeightAccepted_AC, 0.7f);
-            yield return new WaitForSeconds(1);
-        TakingPhoto_AS.Stop();
-        Display_SiteNr(6);
-    }
-
     //Display Sites
     public int currentDisplayedSiteNr;
     bool buttonActivity;
 
     public void Display_StartSite()
     {
+        Display_SiteNr(1);
+    }
+
+    public void Display_IntroductionSite()
+    {
         Display_SiteNr(2);
     }
 
-	public void Display_ScreenSaver(){
-		Display_SiteNr (1);
-	}
+    public void Display_ScreenSaver()
+    {
+        Display_SiteNr(7);
+    }
 
     public void Display_SiteNr(int siteNr)
     {
@@ -105,4 +110,15 @@ public class UI_Manager : MonoBehaviour {
 
     }
 
+    /// <summary>
+    /// Playing Audio Height.mp3 and displaying X-Ray after couple sec.
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator Display_XRayPhoto_With_AudioEffect()
+    {
+        TakingPhoto_AS.PlayOneShot(_userHeightAccepted_AC, 0.7f);
+        yield return new WaitForSeconds(1);
+        TakingPhoto_AS.Stop();
+        Display_SiteNr(6);
+    }
 }

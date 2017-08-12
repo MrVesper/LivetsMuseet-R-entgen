@@ -18,6 +18,7 @@ public class MainApplicationController : MonoBehaviour {
     public float _DISTANCE;
     public int _ALTITUDE;
     private static Vector3 _DELTA_ALT;
+    public bool IsScreenMoving = false;
 
     public Text altitude_Txt;
     public Text distance_Txt;
@@ -53,6 +54,7 @@ public class MainApplicationController : MonoBehaviour {
 
         if (delayedAlt != _ALTITUDE)
         {
+            IsScreenMoving = true;
             if (!_MovingScreen_AS.isPlaying && _MovingScreen_AS != null)
             {
                 _MovingScreen_AS.PlayOneShot(_movingScreen_AC, 0.5f);
@@ -60,6 +62,7 @@ public class MainApplicationController : MonoBehaviour {
         }
         else
         {
+            IsScreenMoving = false;
             _MovingScreen_AS.Stop();
         }
         StartCoroutine(TestALT());
@@ -81,7 +84,7 @@ public class MainApplicationController : MonoBehaviour {
         Start_Arduino_Thread();
         #endregion
 
-        /*float temp = _ALTITUDE - last;
+       /* float temp = _ALTITUDE - last;
         _DELTA_ALT = new Vector3(0.0f, temp, 0.0f);
         last = _ALTITUDE;*/
 
