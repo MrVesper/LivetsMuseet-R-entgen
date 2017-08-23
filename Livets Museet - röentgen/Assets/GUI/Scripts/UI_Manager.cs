@@ -22,29 +22,34 @@ public class UI_Manager : MonoBehaviour {
 	// Update is called once per frame
 	void FixedUpdate () {
        
-		if((currentDisplayedSiteNr >= 3 && currentDisplayedSiteNr <= 6) && !MainApplicationController.gameObject.GetComponent<MainApplicationController>().IsSomebody_behind_Screen())
+		if((currentDisplayedSiteNr >= 3 && currentDisplayedSiteNr <= 5) && !MainApplicationController.gameObject.GetComponent<MainApplicationController>().behidnScreen)
         {
                 Invoke("Display_IntroductionSite", 2);
         }
-        else
+        else 
         {
             CancelInvoke("Display_IntroductionSite");
         }
 
-		if(currentDisplayedSiteNr == 2 && !MainApplicationController.gameObject.GetComponent<MainApplicationController>().IsSomebody_behind_Screen())
-		{
-			Invoke("Display_StartSite", 300);
 
-		}
-		else
-		{
-			CancelInvoke("Display_StartSite");
-		}
-
-        if ((currentDisplayedSiteNr >= 1 && currentDisplayedSiteNr <= 6) &&
-            (!MainApplicationController.gameObject.GetComponent<MainApplicationController>().IsSomebody_behind_Screen() && !MainApplicationController.gameObject.GetComponent<MainApplicationController>().IsScreenMoving) )
+        if (currentDisplayedSiteNr == 6 && !MainApplicationController.gameObject.GetComponent<MainApplicationController>().behidnScreen)
         {
-            Invoke("Display_ScreenSaver", 900);
+            Invoke("Display_StartSite", 1);
+        }
+        else if (currentDisplayedSiteNr == 2 && !MainApplicationController.gameObject.GetComponent<MainApplicationController>().behidnScreen)
+        {
+            Invoke("Display_StartSite", 10);
+
+        }
+        else
+        {
+            CancelInvoke("Display_StartSite");
+        }
+
+        if ((currentDisplayedSiteNr >= 1 && currentDisplayedSiteNr <= 5) &&
+            (!MainApplicationController.gameObject.GetComponent<MainApplicationController>().behidnScreen && !MainApplicationController.gameObject.GetComponent<MainApplicationController>().IsScreenMoving) )
+        {
+            Invoke("Display_ScreenSaver", 300);
 
         }
         else

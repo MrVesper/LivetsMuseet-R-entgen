@@ -16,7 +16,7 @@ public class SiteBehav : MonoBehaviour {
     // Update is called once per frame
     void Update () {
         if ((SiteManager.gameObject.GetComponent<UI_Manager>().currentDisplayedSiteNr >= 2 && SiteManager.gameObject.GetComponent<UI_Manager>().currentDisplayedSiteNr <= 5)
-            && SiteManager.gameObject.GetComponent<UI_Manager>().MainApplicationController.gameObject.GetComponent<MainApplicationController>().IsSomebody_behind_Screen())
+            && SiteManager.gameObject.GetComponent<UI_Manager>().MainApplicationController.gameObject.GetComponent<MainApplicationController>().behidnScreen)
         {
             SiteButton.SetActive(true);
         }

@@ -9,7 +9,7 @@ public class ScreenSaver : MonoBehaviour {
     public GameObject UI_M;
 
 	void Update () {
-		if(MainApplicationController.GetComponent<MainApplicationController>().IsScreenMoving || MainApplicationController.GetComponent<MainApplicationController>().IsSomebody_behind_Screen())
+		if(MainApplicationController.GetComponent<MainApplicationController>().IsScreenMoving || MainApplicationController.GetComponent<MainApplicationController>().behidnScreen)
         {
             UI_M.GetComponent<UI_Manager>().Display_SiteNr(1);
         }

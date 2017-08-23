@@ -6,7 +6,7 @@ public class ButtonSizer : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        gameObject.transform.localPosition = new Vector3(172, -45, 0);
+        gameObject.transform.localPosition = new Vector3(0, -45, 0);
         gameObject.transform.localScale = new Vector3(1, 1, 1);
 	}
 	

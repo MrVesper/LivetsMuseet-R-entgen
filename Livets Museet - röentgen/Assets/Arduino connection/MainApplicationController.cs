@@ -19,6 +19,7 @@ public class MainApplicationController : MonoBehaviour {
     public int _ALTITUDE;
     private static Vector3 _DELTA_ALT;
     public bool IsScreenMoving = false;
+    
 
     public Text altitude_Txt;
     public Text distance_Txt;
@@ -27,8 +28,8 @@ public class MainApplicationController : MonoBehaviour {
     public GameObject rentgen_Ph;
 
     public float _NEW_MAX_HEIGHT_BY_USER;
-   // int last=255;
-
+    //int last=255;
+    public int altimeterReads;
     public  AudioSource _MovingScreen_AS;
     public  AudioClip _movingScreen_AC;
 
@@ -41,18 +42,19 @@ public class MainApplicationController : MonoBehaviour {
          arduinoThread = new Thread(ArduinoThreadMethod);
          arduinoThread.Name = "ArduinoThread";
          _sPorts = new List<string>(SerialPort.GetPortNames());
-        StartCoroutine(TestALT());
+
         _RESET_SENSORS_VARIABLE();
+        StartCoroutine(TestALT());
+        
     }
 
     IEnumerator TestALT()
     {
-
-       int delayedAlt = _ALTITUDE;
+        int delayedAlt = _ALTITUDE;
 
         yield return new WaitForSeconds(0.15f);
 
-        if (delayedAlt != _ALTITUDE)
+        if (delayedAlt != _ALTITUDE && altimeterReads>1)
         {
             IsScreenMoving = true;
             if (!_MovingScreen_AS.isPlaying && _MovingScreen_AS != null)
@@ -70,8 +72,7 @@ public class MainApplicationController : MonoBehaviour {
 
     private void _RESET_SENSORS_VARIABLE()
     {
-        _NEW_MAX_HEIGHT_BY_USER = 0;
-        _DISTANCE = _ALTITUDE;
+        _NEW_MAX_HEIGHT_BY_USER = _DISTANCE  = altimeterReads = 0;
         _DELTA_ALT = Vector3.zero;
     }
 
@@ -84,12 +85,16 @@ public class MainApplicationController : MonoBehaviour {
         Start_Arduino_Thread();
         #endregion
 
-       /* float temp = _ALTITUDE - last;
-        _DELTA_ALT = new Vector3(0.0f, temp, 0.0f);
-        last = _ALTITUDE;*/
+       /* altimeterReads++;
+        if (altimeterReads > 10 && !IsScreenMoving) altimeterReads = 1;
+         float temp = _ALTITUDE - last;
+         _DELTA_ALT = new Vector3(0.0f, temp, 0.0f);
+         last = _ALTITUDE;*/
+
+        IsSomebody_behind_Screen();
 
         #region READING_AND_USING_SENSORS_VARIABLE
-        DisplaySensorsValue();
+             DisplaySensorsValue();
             TransformRentgenPhoto();
             photo_Y.text = "Photo Y: " + rentgen_Ph.transform.position.y.ToString();
         #endregion
@@ -133,7 +138,7 @@ public class MainApplicationController : MonoBehaviour {
     public void TransformRentgenPhoto()
     {
 
-        if (IsSomebody_behind_Screen() && _DELTA_ALT != Vector3.zero) 
+        if (behidnScreen && _DELTA_ALT != Vector3.zero) 
         {
                 float interval = MathematicAndfunctions.GetInterval(MathematicAndfunctions._GetNewMaximumPotentiometrValue(_NEW_MAX_HEIGHT_BY_USER));
                 rentgen_Ph.transform.position += new Vector3(0, ((_DELTA_ALT.y * -1) * interval), 0);
@@ -146,10 +151,18 @@ public class MainApplicationController : MonoBehaviour {
         _MovingScreen_AS.Stop();
     }
 
-    public bool IsSomebody_behind_Screen()
+    public bool behidnScreen;
+
+    public void IsSomebody_behind_Screen()
     {
-        if ((_DISTANCE >= 1 && _DISTANCE <= 75)) return true;
-        else return false;
+        if ((_DISTANCE >= 1 && _DISTANCE <= 75))
+        {
+            behidnScreen = true;
+        }
+        else
+        {
+            behidnScreen = false;
+        }
     }
 
   public bool IsArduinoThreadRunning()
@@ -188,12 +201,13 @@ public class MainApplicationController : MonoBehaviour {
                     var result = line.Split(',');
                     float temp = Convert.ToInt32(result[1]) - _ALTITUDE;
 
-                    _DELTA_ALT = new Vector3(0.0f,temp,0.0f);
+                    altimeterReads++; //counting altitude reads for calibrating first altitude variable with potentiometer value.
+                    if (altimeterReads > 10 && !IsScreenMoving) altimeterReads = 1; //Preventing program before going out of range.
+
+                    _DELTA_ALT = new Vector3(0.0f, temp, 0.0f);
 
                     _DISTANCE = Convert.ToInt32(result[0]);
                     _ALTITUDE = Convert.ToInt32(result[1]);
-
-
 
                     Debug.LogWarning("_DELTA_ALT: "+ _DELTA_ALT);
                     stream.BaseStream.Flush();
